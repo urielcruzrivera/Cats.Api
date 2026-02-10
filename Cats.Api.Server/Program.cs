@@ -1,26 +1,17 @@
 using Cats.Application.UseCases.GetBreeds;
 using Cats.Application.UseCases.GetImages;
 using Cats.Infrastructure;
-
-
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
-
-// Application handlers
 builder.Services.AddScoped<GetBreedsHandler>();
 builder.Services.AddScoped<GetImagesHandler>();
 
-// Infrastructure
 builder.Services.AddInfrastructure(builder.Configuration);
 
 const string CorsPolicy = "AngularClient";
@@ -42,24 +33,61 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+
 app.UseCors(CorsPolicy);
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
-// Configure the HTTP request pipeline.
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapFallbackToFile("/index.html");
+// === Angular Static Files ===
+var angularDistPath = Path.Combine(
+    app.Environment.ContentRootPath,
+    "dist", "cats.api.client", "browser"
+);
+
+if (Directory.Exists(angularDistPath))
+{
+    var fileProvider = new PhysicalFileProvider(angularDistPath);
+
+    app.UseDefaultFiles(new DefaultFilesOptions
+    {
+        FileProvider = fileProvider
+    });
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = fileProvider
+    });
+
+    // Fallback SPA (excluye API y Swagger)
+    app.MapFallback(async context =>
+    {
+        var path = context.Request.Path.Value ?? "";
+
+        // Ajusta estas exclusiones si tus endpoints NO usan /api
+        if (path.StartsWith("/api", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+
+        context.Response.ContentType = "text/html";
+        await context.Response.SendFileAsync(Path.Combine(angularDistPath, "index.html"));
+    });
+}
+else
+{
+    app.MapGet("/", () => "Angular dist not found. Build the client and try again.");
+}
 
 app.Run();
