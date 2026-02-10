@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="cats.api.client/cats.api.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Cats.Api.Server/Cats.Api.csproj" />
+  <Project Path="Cats.Application/Cats.Application.csproj" Id="a658e25d-02f1-4133-919d-866701a9d5d7" />
+  <Project Path="Cats.Domain/Cats.Domain.csproj" Id="bfc874ce-b09b-4ec3-915c-38a32c1b253c" />
+  <Project Path="Cats.Infrastructure/Cats.Infrastructure.csproj" Id="4732dc4a-6bc5-4d77-9fb9-f2d82872d5a5" />
+</Solution>

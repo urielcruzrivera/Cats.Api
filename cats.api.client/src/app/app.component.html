@@ -1,0 +1,58 @@
+<p-card header="Cat Browser (TheCatAPI)">
+  <div class="form-grid">
+    <div class="field">
+      <label>Raza</label>
+
+      <p-dropdown [options]="breeds"
+                  optionLabel="name"
+                  optionValue="id"
+                  [(ngModel)]="selectedBreedId"
+                  [filter]="true"
+                  filterBy="name"
+                  placeholder="Selecciona una raza"
+                  [disabled]="loadingBreeds"
+                  styleClass="w-full"></p-dropdown>
+
+      <div class="hint" *ngIf="loadingBreeds">
+        <p-progressSpinner styleClass="spinner" strokeWidth="4"></p-progressSpinner>
+        Cargando razas...
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Límite</label>
+
+      <p-inputNumber [(ngModel)]="limit"
+                     [min]="1"
+                     [max]="50"
+                     [showButtons]="true"
+                     buttonLayout="horizontal"
+                     incrementButtonIcon="pi pi-plus"
+                     decrementButtonIcon="pi pi-minus"
+                     inputStyleClass="w-full"></p-inputNumber>
+
+      <small class="muted">1 a 50</small>
+    </div>
+
+    <div class="actions">
+      <p-button label="Buscar"
+                icon="pi pi-search"
+                (onClick)="search()"
+                [disabled]="loadingImages || loadingBreeds"></p-button>
+    </div>
+  </div>
+
+  <p-message *ngIf="errorMessage" severity="warn" [text]="errorMessage"></p-message>
+
+  <div class="loading" *ngIf="loadingImages">
+    <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+    <span>Buscando imágenes...</span>
+  </div>
+
+  <div class="cats-grid" *ngIf="images?.length">
+    <div class="cat-card" *ngFor="let img of images; trackBy: trackById">
+      <img [src]="img.url" alt="Cat image" />
+    </div>
+  </div>
+
+</p-card>
