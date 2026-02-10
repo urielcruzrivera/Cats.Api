@@ -37,7 +37,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(CorsPolicy);
 
-// Swagger
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -48,7 +48,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// === Angular Static Files ===
+
 var angularDistPath = Path.Combine(
     app.Environment.ContentRootPath,
     "dist", "cats.api.client", "browser"
@@ -68,12 +68,12 @@ if (Directory.Exists(angularDistPath))
         FileProvider = fileProvider
     });
 
-    // Fallback SPA (excluye API y Swagger)
+
     app.MapFallback(async context =>
     {
         var path = context.Request.Path.Value ?? "";
 
-        // Ajusta estas exclusiones si tus endpoints NO usan /api
+
         if (path.StartsWith("/api", StringComparison.OrdinalIgnoreCase) ||
             path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase))
         {
